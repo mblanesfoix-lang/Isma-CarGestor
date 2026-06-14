@@ -6,17 +6,23 @@
   "scripts": {
     "start": "concurrently --kill-others false \"npm run react-start\" \"node electron/start-server.js\" \"node electron/wait-and-launch.js\"",
     "react-start": "react-scripts start",
-    "build": "react-scripts build && electron-builder",
+    "build": "react-scripts build",
+    "build:desktop": "react-scripts build && electron-builder",
     "build:dir": "react-scripts build && electron-builder --dir",
     "electron": "electron .",
-    "server": "node electron/start-server.js"
+    "server": "node electron/start-server.js",
+    "start:server": "node server/index.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.100.1",
+    "@supabase/supabase-js": "^2.108.1",
     "axios": "^1.17.0",
     "better-sqlite3": "^9.4.3",
     "cheerio": "^1.2.0",
+    "cors": "^2.8.6",
     "dotenv": "^17.4.2",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.21.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.0",
@@ -51,8 +57,18 @@
     ],
     "win": {
       "target": [
-        { "target": "nsis", "arch": ["x64"] },
-        { "target": "portable", "arch": ["x64"] }
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
       ]
     },
     "nsis": {

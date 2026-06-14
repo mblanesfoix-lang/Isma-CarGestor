@@ -6,6 +6,8 @@ import Gastos from './pages/Gastos';
 import Finanzas from './pages/Finanzas';
 import Ajustes from './pages/Ajustes';
 import Isma from './pages/Isma';
+import Login from './pages/Login';
+import { supabase } from './supabaseClient';
 
 const ICONS = {
   isma: (
@@ -82,12 +84,24 @@ const PAGE_COMPONENTS = {
 export default function App() {
   const [page, setPage] = useState('dashboard');
   const [animKey, setAnimKey] = useState(0);
+  const [session, setSession] = useState(undefined);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSession(data.session));
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+    return () => listener.subscription.unsubscribe();
+  }, []);
 
   const navigate = (id) => {
     if (id === page) return;
     setPage(id);
     setAnimKey(k => k + 1);
   };
+
+  if (session === undefined) return null;
+  if (!session) return <Login />;
 
   const PageComponent = PAGE_COMPONENTS[page] || Dashboard;
 
@@ -147,6 +161,9 @@ export default function App() {
         </div>
 
         <div className="sidebar-footer">
+          <button className="nav-item" onClick={() => supabase.auth.signOut()}>
+            <span className="nav-label">Cerrar sesión</span>
+          </button>
           <div className="sidebar-version">v1.0 &nbsp;·&nbsp; 2025</div>
         </div>
       </nav>

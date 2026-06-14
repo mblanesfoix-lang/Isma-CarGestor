@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { supabase } from '../supabaseClient';
 
 const ISMA_SYSTEM = `Eres Isma, un agente experto en importación de vehículos y mercado de compraventa de coches. Tu perfil:
 
@@ -188,9 +189,13 @@ export default function Isma() {
         content: m.content,
       }));
 
+      const { data: { session } } = await supabase.auth.getSession();
       const res = await fetch('/api/isma', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
         body: JSON.stringify({ messages: history, system: ISMA_SYSTEM }),
       });
 
