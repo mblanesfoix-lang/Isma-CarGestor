@@ -4,11 +4,15 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recha
 
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    api('dashboard:stats').then(r => r && setStats(r));
+    api('dashboard:stats')
+      .then(r => r && setStats(r))
+      .catch(err => setError(err.message));
   }, []);
 
+  if (error) return <div className="empty-state"><p>Error cargando dashboard: {error}</p></div>;
   if (!stats) return <div className="empty-state"><p>Cargando...</p></div>;
 
   const chartData = (stats.ventasPorMes || []).reverse().map(m => ({

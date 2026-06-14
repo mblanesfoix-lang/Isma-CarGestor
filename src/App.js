@@ -85,6 +85,7 @@ export default function App() {
   const [page, setPage] = useState('dashboard');
   const [animKey, setAnimKey] = useState(0);
   const [session, setSession] = useState(undefined);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
@@ -95,6 +96,7 @@ export default function App() {
   }, []);
 
   const navigate = (id) => {
+    setMenuOpen(false);
     if (id === page) return;
     setPage(id);
     setAnimKey(k => k + 1);
@@ -107,7 +109,32 @@ export default function App() {
 
   return (
     <div className="app">
-      <nav className="sidebar">
+      <div className="mobile-topbar">
+        <div className="mobile-topbar-logo">
+          <div className="sidebar-logo-icon">
+            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 13L5 8h10l2 5H3z" fill="white" fillOpacity=".9"/>
+              <circle cx="6.5" cy="14.5" r="1.5" fill="white"/>
+              <circle cx="13.5" cy="14.5" r="1.5" fill="white"/>
+              <path d="M7 10h6M8 8l-1-3h6l-1 3" stroke="white" strokeWidth="1" strokeLinecap="round" fillOpacity=".4" fill="none"/>
+            </svg>
+          </div>
+          <h1>Car<span>Gestor</span></h1>
+        </div>
+        <button className="mobile-menu-btn" onClick={() => setMenuOpen(o => !o)} aria-label="Menu">
+          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {menuOpen ? (
+              <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            ) : (
+              <path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            )}
+          </svg>
+        </button>
+      </div>
+
+      {menuOpen && <div className="mobile-overlay" onClick={() => setMenuOpen(false)} />}
+
+      <nav className={`sidebar ${menuOpen ? 'sidebar--open' : ''}`}>
         <div className="sidebar-logo">
           <div className="sidebar-logo-icon">
             <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
