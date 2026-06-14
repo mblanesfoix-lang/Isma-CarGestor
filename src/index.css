@@ -1696,21 +1696,37 @@ textarea { resize: vertical; min-height: 80px; }
   }
 
   .modal h3 {
-    padding: 18px 16px 14px;
+    padding: 14px 14px 10px;
+    font-size: 17px;
   }
 
   .modal > *:not(h3):not(.modal-footer) {
-    padding-left: 16px;
-    padding-right: 16px;
+    padding-left: 14px;
+    padding-right: 14px;
   }
 
   .modal-footer {
-    padding: 16px;
+    padding: 12px 14px;
     border-radius: 0;
     flex-wrap: wrap;
   }
 
   .form-grid {
     grid-template-columns: 1fr;
+    gap: 10px;
   }
+
+  .form-group { gap: 4px; }
+
+  label { font-size: 11px; }
+
+  /* font-size 16px evita el zoom automatico de iOS al enfocar */
+  input, select, textarea {
+    padding: 8px 10px;
+    font-size: 16px;
+  }
+
+  textarea { min-height: 60px; }
+
+  .btn { padding: 10px 16px; font-size: 13px; }
 }
