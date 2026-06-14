@@ -29,14 +29,9 @@ const ROUTES = {
   'comparador:buscar': (data) => ({ method: 'POST', url: '/api/comparador', body: data }),
 };
 
-export async function api(channel, ...args) {
-  const build = ROUTES[channel];
-  if (!build) return Promise.resolve([]);
-  const { method, url, body } = build(...args);
-
-  const { data: { session } } = await supabase.auth.getSession();
+async function doFetch(url, method, body, accessToken) {
   const headers = { 'Content-Type': 'application/json' };
-  if (session) headers['Authorization'] = `Bearer ${session.access_token}`;
+  if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
 
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 120000);
@@ -56,11 +51,36 @@ export async function api(channel, ...args) {
     } catch {
       throw new Error(`Respuesta invalida del servidor: ${text.slice(0, 200)}`);
     }
-    if (!r.ok) throw new Error(data?.error || `Error ${r.status}`);
+    if (!r.ok) {
+      const error = new Error(data?.error || `Error ${r.status}`);
+      error.status = r.status;
+      throw error;
+    }
     return data;
   } catch (err) {
     clearTimeout(timer);
     if (err.name === 'AbortError') throw new Error('Timeout: la peticion tardo demasiado');
+    throw err;
+  }
+}
+
+export async function api(channel, ...args) {
+  const build = ROUTES[channel];
+  if (!build) return Promise.resolve([]);
+  const { method, url, body } = build(...args);
+
+  const { data: { session } } = await supabase.auth.getSession();
+
+  try {
+    return await doFetch(url, method, body, session?.access_token);
+  } catch (err) {
+    if (err.status === 401 && session) {
+      const { data: refreshed } = await supabase.auth.refreshSession();
+      if (refreshed?.session) {
+        return await doFetch(url, method, body, refreshed.session.access_token);
+      }
+      await supabase.auth.signOut();
+    }
     throw err;
   }
 }

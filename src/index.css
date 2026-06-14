@@ -1676,4 +1676,41 @@ textarea { resize: vertical; min-height: 80px; }
   .table-wrap {
     overflow-x: auto;
   }
+
+  .modal-overlay {
+    align-items: flex-start;
+    overflow-y: auto;
+    padding: 16px 0;
+  }
+
+  .modal {
+    width: 100%;
+    max-width: 100%;
+    max-height: none;
+    border-radius: 0;
+    margin: auto 0;
+  }
+
+  .modal::before {
+    border-radius: 0;
+  }
+
+  .modal h3 {
+    padding: 18px 16px 14px;
+  }
+
+  .modal > *:not(h3):not(.modal-footer) {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .modal-footer {
+    padding: 16px;
+    border-radius: 0;
+    flex-wrap: wrap;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
 }
