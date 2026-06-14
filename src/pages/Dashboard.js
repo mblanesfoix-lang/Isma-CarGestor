@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { api, fmtEur, fmt, fmtDate } from '../utils';
+import { api, fmtEur, fmt, fmtDate, CATEGORIAS_GASTO } from '../utils';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+
+const catLabel = (value) => CATEGORIAS_GASTO.find(c => c.value === value)?.label || value;
 
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
@@ -51,6 +53,31 @@ export default function Dashboard() {
         </div>
       </div>
 
+      <div className="stats-grid">
+        <div className="stat-card green-card">
+          <div className="label">Ingresos totales (ventas)</div>
+          <div className="value green">{fmtEur(stats.totalIngresos)}</div>
+        </div>
+        <div className="stat-card">
+          <div className="label">Gastos totales</div>
+          <div className="value red">{fmtEur(stats.totalGastos)}</div>
+        </div>
+        <div className="stat-card">
+          <div className="label">Ingresos este mes</div>
+          <div className="value green">{fmtEur(stats.ingresosMes)}</div>
+        </div>
+        <div className="stat-card">
+          <div className="label">Gastos este mes</div>
+          <div className="value red">{fmtEur(stats.gastosMes)}</div>
+        </div>
+        <div className="stat-card yellow-card">
+          <div className="label">Beneficio este mes</div>
+          <div className={`value ${stats.beneficioMes >= 0 ? 'green' : 'red'}`}>
+            {fmtEur(stats.beneficioMes)}
+          </div>
+        </div>
+      </div>
+
       {chartData.length > 0 && (
         <div className="detail-panel">
           <h3>Ventas por mes (EUR)</h3>
@@ -65,6 +92,27 @@ export default function Dashboard() {
               <Bar dataKey="total" fill="#d5001c" radius={[0, 0, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
+        </div>
+      )}
+
+      {(stats.gastosPorCategoria?.length > 0) && (
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Categoria de gasto</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {stats.gastosPorCategoria.map((g, i) => (
+                <tr key={i}>
+                  <td style={{ textTransform: 'capitalize' }}>{catLabel(g.categoria)}</td>
+                  <td style={{ color: 'var(--red)', fontWeight: 700 }}>{fmtEur(g.total)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 

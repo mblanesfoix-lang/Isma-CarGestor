@@ -31,7 +31,27 @@ router.get('/stats', async (req, res, next) => {
       FROM ventas GROUP BY mes ORDER BY mes DESC LIMIT 12
     `)).rows.map(r => ({ mes: r.mes, cantidad: Number(r.cantidad), total: Number(r.total) }));
 
-    res.json({ totalVehiculos, enStock, vendidos, totalInvertido, beneficioTotal, ultimasVentas, ventasPorMes });
+    const totalIngresos = Number((await db.query("SELECT COALESCE(SUM(precio_venta),0) as t FROM ventas")).rows[0].t);
+    const totalGastos = Number((await db.query("SELECT COALESCE(SUM(importe),0) as t FROM gastos")).rows[0].t);
+
+    const mesActual = (await db.query(`
+      SELECT
+        COALESCE((SELECT SUM(precio_venta) FROM ventas WHERE to_char(fecha_venta::date,'YYYY-MM') = to_char(now(),'YYYY-MM')), 0) AS ingresos,
+        COALESCE((SELECT SUM(importe) FROM gastos WHERE to_char(fecha::date,'YYYY-MM') = to_char(now(),'YYYY-MM')), 0) AS gastos
+    `)).rows[0];
+    const ingresosMes = Number(mesActual.ingresos);
+    const gastosMes = Number(mesActual.gastos);
+
+    const gastosPorCategoria = (await db.query(`
+      SELECT categoria, COALESCE(SUM(importe),0) as total
+      FROM gastos GROUP BY categoria ORDER BY total DESC
+    `)).rows.map(r => ({ categoria: r.categoria, total: Number(r.total) }));
+
+    res.json({
+      totalVehiculos, enStock, vendidos, totalInvertido, beneficioTotal, ultimasVentas, ventasPorMes,
+      totalIngresos, totalGastos, ingresosMes, gastosMes, beneficioMes: ingresosMes - gastosMes,
+      gastosPorCategoria,
+    });
   } catch (err) { next(err); }
 });
 
